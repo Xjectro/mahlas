@@ -69,36 +69,6 @@ Hiçbiri. Mahlas'ın sunucusu, hesabı veya telemetrisi yoktur. Her kullanıcı 
 - `~/Library/Application Support/Mahlas/`: sanal diskler, ağ geçidi dosyaları, paylaşılan klasör
 - Keychain (`com.mahlas.app`): Mullvad hesap numarası ve WireGuard anahtarı
 
-## Geliştirme
-
-Xcode gerekmez, Command Line Tools yeterlidir.
-
-```sh
-./scripts/build-app.sh     # build/Mahlas.app
-./scripts/package.sh       # dist/Mahlas.dmg, dist/Mahlas.zip, dist/SHA256SUMS.txt
-```
-
-`package.sh`, paketlemeden önce uygulamanın içinde derleyen kişinin kullanıcı adı, ev dizini, gerçek adı, git kimliği veya bilgisayar adı geçiyor mu diye bakar. Geçiyorsa paketlemeyi durdurur. Uygulama ad-hoc imzalıdır (kimseye bağlı bir geliştirici sertifikası yoktur).
-
-Hata ayıklama modları:
-
-```sh
-build/Mahlas.app/Contents/MacOS/Mahlas --test-gateway 60   # ağ geçidini sahte anahtarla açar, konsolu basar
-build/Mahlas.app/Contents/MacOS/Mahlas --snapshot <klasör>  # ekranları PNG olarak çizer
-```
-
-## Anonim yayınlama
-
-- Uygulamanın içinde yayınlayanın adı yoktur ve `package.sh` bunu her derlemede denetler.
-- Kaynak kodu yayınlayacaksan, kişisel hesabından bağımsız bir hesap ve ayrı bir git kimliği kullan:
-
-  ```sh
-  git config user.name  "mahlas"
-  git config user.email "mahlas@users.noreply.github.com"
-  ```
-
-- Apple Developer ID ile imzalamak, macOS uyarısını kaldırır ama sertifikada geliştiricinin adını gösterir. Bu yüzden Mahlas bilerek imzasız dağıtılır; kullanıcılar yukarıdaki açma komutunu bir kez çalıştırır.
-
 ## Lisanslar
 
 - Arayüz yazı tipi: [Unbounded](https://fonts.google.com/specimen/Unbounded) (SIL Open Font License)
