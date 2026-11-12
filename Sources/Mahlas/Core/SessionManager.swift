@@ -34,6 +34,7 @@ final class SessionManager: NSObject, ObservableObject, VZVirtualMachineDelegate
     @Published var ipswReady = FileManager.default.fileExists(atPath: Paths.ipsw.path)
     @Published var installed = FileManager.default.fileExists(atPath: MacBundle.golden.hardwareModel.path)
     @Published var goldenReady = FileManager.default.fileExists(atPath: Paths.goldenMarker.path)
+    @Published var agentInstalled = FileManager.default.fileExists(atPath: Paths.agentMarker.path)
     @Published var identity: MachineIdentity?
     @Published var exit: Mullvad.ExitCheck?
     @Published var lastHandshake: Date?
@@ -53,8 +54,6 @@ final class SessionManager: NSObject, ObservableObject, VZVirtualMachineDelegate
     // MARK: Settings
 
     @AppStorage("rotateKeyEachSession") var rotateKeyEachSession = true
-    @AppStorage("randomLocation") var randomLocation = true
-    @AppStorage("fixedLocationIndex") var fixedLocationIndex = 0
     @AppStorage("diskGB") var diskGB = 80
 
     var isReadyToLaunch: Bool { vpnConfigured && goldenReady && isAppleSilicon }
@@ -199,7 +198,6 @@ final class SessionManager: NSObject, ObservableObject, VZVirtualMachineDelegate
     /// install the Mahlas agent. Networking already goes through the gateway.
     func beginFirstSetup() async {
         guard installed, !goldenReady else { return }
-        try? FileManager.default.removeItem(at: Paths.agentMarker)
         var id = MachineIdentity.random(cores: 4...4, ramGB: [8])
         id.display = .init(width: 1920, height: 1200, ppi: 110)
         await launch(bundle: .golden, identity: id, machineID: MacBundle.golden.loadMachineIdentifier(), shareReadOnly: false)
@@ -219,8 +217,7 @@ final class SessionManager: NSObject, ObservableObject, VZVirtualMachineDelegate
         do { try MacVM.cloneGoldenToSession() } catch { fail("Disk klonlanamadı: \(error.localizedDescription)"); return }
 
         let res = MacVM.hostResources
-        let fixed = randomLocation ? nil : Locations.all[min(max(fixedLocationIndex, 0), Locations.all.count - 1)]
-        let id = MachineIdentity.random(location: fixed, cores: res.cpu, ramGB: res.ramGB)
+        let id = MachineIdentity.random(location: Locations.istanbul, cores: res.cpu, ramGB: res.ramGB)
         // A new machine identifier gives the guest a new serial number / ECID.
         await launch(bundle: .session, identity: id, machineID: VZMacMachineIdentifier(), shareReadOnly: true)
         if macVM != nil {
@@ -300,19 +297,44 @@ final class SessionManager: NSObject, ObservableObject, VZVirtualMachineDelegate
         await startSession()
     }
 
+    /// Seal the golden image. Works whether the sanal Mac is still open or
+    /// already shut down, and whether or not the in-guest agent was installed.
+    func sealGolden() async {
+        guard installed, !goldenReady else { return }
+        if phase == .firstSetup {
+            sealRequested = true
+            await stopSession()          // teardown seals once the guest is down
+        } else {
+            markSealed()
+        }
+    }
+
+    private var sealRequested = false
+
+    private func markSealed() {
+        agentInstalled = FileManager.default.fileExists(atPath: Paths.agentMarker.path)
+        FileManager.default.createFile(atPath: Paths.goldenMarker.path, contents: Data())
+        goldenReady = true
+        log("Altın imaj mühürlendi — artık her oturum bu imajın temiz bir kopyasıyla, yeni bir kimlikle açılır")
+        if !agentInstalled {
+            log("Mahlas ajanı kurulu değil: bilgisayar adı ve saat dilimi oturumdan oturuma değişmeyecek", error: true)
+        }
+        Synth.shared.select()
+    }
+
     private func teardown(sealIfReady: Bool) {
         macVM = nil
         identity = nil; exit = nil; lastHandshake = nil; sessionStarted = nil; gatewayReady = false
         try? GuestAgent.writeShare(sessionConfig: nil)
+        agentInstalled = FileManager.default.fileExists(atPath: Paths.agentMarker.path)
         if sealIfReady {
-            if FileManager.default.fileExists(atPath: Paths.agentMarker.path) {
-                FileManager.default.createFile(atPath: Paths.goldenMarker.path, contents: Data())
-                goldenReady = true
-                log("Altın imaj mühürlendi — artık her oturum sıfırdan, yeni bir kimlikle açılır")
-                Synth.shared.select()
+            // The agent installer shuts the guest down itself → seal automatically.
+            if agentInstalled || sealRequested {
+                markSealed()
             } else {
-                log("Mahlas ajanı kurulmadan kapatıldı. İlk açılışı tekrar başlatıp ajanı kur.", error: true)
+                log("Sanal Mac kapandı. Kurulumu bitirdiysen Kurulum sekmesinden \"Kurulumu bitirdim, mühürle\" de.")
             }
+            sealRequested = false
         } else if goldenReady {
             MacVM.wipeSession()
             log("Oturum diski silindi — hiçbir iz kalmadı")

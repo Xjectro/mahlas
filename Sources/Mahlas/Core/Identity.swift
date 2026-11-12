@@ -10,32 +10,10 @@ struct ExitLocation: Hashable, Codable {
 }
 
 enum Locations {
-    static let all: [ExitLocation] = [
-        .init(code: "nl-ams", flag: "🇳🇱", displayName: "Amsterdam, Hollanda", timeZone: "Europe/Amsterdam"),
-        .init(code: "de-fra", flag: "🇩🇪", displayName: "Frankfurt, Almanya", timeZone: "Europe/Berlin"),
-        .init(code: "de-ber", flag: "🇩🇪", displayName: "Berlin, Almanya", timeZone: "Europe/Berlin"),
-        .init(code: "se-sto", flag: "🇸🇪", displayName: "Stockholm, İsveç", timeZone: "Europe/Stockholm"),
-        .init(code: "ch-zrh", flag: "🇨🇭", displayName: "Zürih, İsviçre", timeZone: "Europe/Zurich"),
-        .init(code: "fr-par", flag: "🇫🇷", displayName: "Paris, Fransa", timeZone: "Europe/Paris"),
-        .init(code: "es-mad", flag: "🇪🇸", displayName: "Madrid, İspanya", timeZone: "Europe/Madrid"),
-        .init(code: "gb-lon", flag: "🇬🇧", displayName: "Londra, Birleşik Krallık", timeZone: "Europe/London"),
-        .init(code: "ie-dub", flag: "🇮🇪", displayName: "Dublin, İrlanda", timeZone: "Europe/Dublin"),
-        .init(code: "fi-hel", flag: "🇫🇮", displayName: "Helsinki, Finlandiya", timeZone: "Europe/Helsinki"),
-        .init(code: "no-osl", flag: "🇳🇴", displayName: "Oslo, Norveç", timeZone: "Europe/Oslo"),
-        .init(code: "dk-cph", flag: "🇩🇰", displayName: "Kopenhag, Danimarka", timeZone: "Europe/Copenhagen"),
-        .init(code: "at-vie", flag: "🇦🇹", displayName: "Viyana, Avusturya", timeZone: "Europe/Vienna"),
-        .init(code: "it-mil", flag: "🇮🇹", displayName: "Milano, İtalya", timeZone: "Europe/Rome"),
-        .init(code: "pl-waw", flag: "🇵🇱", displayName: "Varşova, Polonya", timeZone: "Europe/Warsaw"),
-        .init(code: "ro-buh", flag: "🇷🇴", displayName: "Bükreş, Romanya", timeZone: "Europe/Bucharest"),
-        .init(code: "us-nyc", flag: "🇺🇸", displayName: "New York, ABD", timeZone: "America/New_York"),
-        .init(code: "us-chi", flag: "🇺🇸", displayName: "Chicago, ABD", timeZone: "America/Chicago"),
-        .init(code: "us-lax", flag: "🇺🇸", displayName: "Los Angeles, ABD", timeZone: "America/Los_Angeles"),
-        .init(code: "ca-tor", flag: "🇨🇦", displayName: "Toronto, Kanada", timeZone: "America/Toronto"),
-        .init(code: "jp-tyo", flag: "🇯🇵", displayName: "Tokyo, Japonya", timeZone: "Asia/Tokyo"),
-        .init(code: "sg-sin", flag: "🇸🇬", displayName: "Singapur", timeZone: "Asia/Singapore"),
-        .init(code: "au-syd", flag: "🇦🇺", displayName: "Sidney, Avustralya", timeZone: "Australia/Sydney"),
-        .init(code: "br-sao", flag: "🇧🇷", displayName: "São Paulo, Brezilya", timeZone: "America/Sao_Paulo")
-    ]
+    /// Always exit in Turkey. Istanbul is Mullvad's only Turkish location;
+    /// each session picks one of its relays at random.
+    static let istanbul = ExitLocation(code: "tr-ist", flag: "🇹🇷", displayName: "İstanbul, Türkiye", timeZone: "Europe/Istanbul")
+    static let all: [ExitLocation] = [istanbul]
 }
 
 /// Everything that makes one session look like a different physical Mac.

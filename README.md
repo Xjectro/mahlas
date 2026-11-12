@@ -51,7 +51,7 @@ Bundan sonra her **Yeni Kimlikle Başlat** tek tıktır.
 - **IPv6 kapalı**, IPv6 trafiği de düşürülür.
 - **Çevrimdışı ağ geçidi.** Ağ geçidinin bütün paketleri, Alpine'in imzalı paket diziniyle birlikte açılış diskine gömülüdür. Ağ geçidi açılırken internete çıkmaz; WireGuard el sıkışması dışında hiçbir şey göndermez.
 - **Anahtar diske yazılmaz.** WireGuard özel anahtarı Keychain'de durur ve yalnızca ağ geçidinin belleğine aktarılır. İstersen her oturumda yenilenir, böylece oturumlar Mullvad tarafında birbirine bağlanamaz.
-- **Her oturum yeni bir bilgisayar.** Her başlatışta şunlar rastgele seçilir: makine kimliği (seri numarası/ECID), MAC adresi (gerçek Apple üretici kodlarıyla), bilgisayar adı, işlemci ve bellek miktarı, ekran çözünürlüğü, Mullvad çıkış şehri ve sunucusu, buna uygun saat dilimi.
+- **Her oturum yeni bir bilgisayar.** Her başlatışta şunlar rastgele seçilir: makine kimliği (seri numarası/ECID), MAC adresi (gerçek Apple üretici kodlarıyla), bilgisayar adı, işlemci ve bellek miktarı, ekran çözünürlüğü, Mullvad'ın İstanbul sunucularından biri. Çıkış her zaman Türkiye'dendir, saat dilimi de buna göre İstanbul'dur.
 - **İz kalmaz.** Her oturum, mühürlü imajın anlık bir APFS klonudur. Kapatıldığında disk silinir.
 - **Kapalı donanım.** Mikrofon, kamera ve USB aktarımı yoktur. Paylaşılan klasör oturumlarda salt okunurdur.
 - **Sertleştirilmiş misafir.** Güvenlik duvarı ve gizli mod açıktır, Bonjour yayını ve tanılama verisi gönderimi kapalıdır.
@@ -71,6 +71,8 @@ Hiçbiri. Mahlas'ın sunucusu, hesabı veya telemetrisi yoktur. Her kullanıcı 
 
 ## Lisanslar
 
-- Arayüz yazı tipi: [Unbounded](https://fonts.google.com/specimen/Unbounded) (SIL Open Font License)
+Mahlas [MIT lisansı](LICENSE) ile dağıtılır.
+
+- Arayüz yazı tipi: [Unbounded](https://fonts.google.com/specimen/Unbounded) (SIL Open Font License 1.1, metni: [OFL.txt](Sources/Mahlas/Resources/Fonts/OFL.txt))
 - Ağ geçidi: [Alpine Linux](https://alpinelinux.org) paketleri, ilk kurulumda Alpine'in resmi deposundan indirilir.
 - macOS, Apple'ın lisans koşulları kapsamında kullanıcı tarafından Apple'dan indirilir. Apple, Apple donanımında aynı anda en fazla iki macOS sanal makinesine izin verir.

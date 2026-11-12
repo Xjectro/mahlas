@@ -152,7 +152,7 @@ struct HeroCard: View {
             case .firstSetup:
                 Button { section = .desktop } label: { Label("Sanal Mac'e Git", systemImage: "display") }
                     .buttonStyle(RedButtonStyle())
-                Button { section = .setup } label: { Label("Talimatlar", systemImage: "list.number") }
+                Button { section = .setup } label: { Label("Bitirdim, mühürle", systemImage: "checkmark.seal.fill") }
                     .buttonStyle(RedButtonStyle(prominent: false))
             case .working, .downloading, .installing:
                 ProgressView().controlSize(.small).tint(Theme.red)

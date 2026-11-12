@@ -4,8 +4,6 @@ struct SettingsView: View {
     @EnvironmentObject private var session: SessionManager
 
     @AppStorage("rotateKeyEachSession") private var rotateKey = true
-    @AppStorage("randomLocation") private var randomLocation = true
-    @AppStorage("fixedLocationIndex") private var fixedLocationIndex = 0
     @AppStorage("diskGB") private var diskGB = 80
     @AppStorage("mahlas.muted") private var muted = false
     @State private var confirmReset = false
@@ -22,17 +20,10 @@ struct SettingsView: View {
                 group("Kimlik ve gizlilik") {
                     toggle("Her oturumda WireGuard anahtarını yenile",
                            "Oturumlar Mullvad tarafında aynı anahtarla ilişkilendirilemez.", $rotateKey)
-                    toggle("Rastgele çıkış konumu",
-                           "Her oturum farklı bir şehirden internete çıkar; saat dilimi buna uyar.", $randomLocation)
-                    if !randomLocation {
-                        row("Sabit konum") {
-                            Picker("", selection: $fixedLocationIndex) {
-                                ForEach(Array(Locations.all.enumerated()), id: \.offset) { i, l in
-                                    Text("\(l.flag)  \(l.displayName)").tag(i)
-                                }
-                            }
-                            .labelsHidden().frame(width: 260)
-                        }
+                    row("Çıkış konumu") {
+                        Text("\(Locations.istanbul.flag)  \(Locations.istanbul.displayName)")
+                            .font(Theme.body(13, weight: .medium))
+                            .foregroundStyle(Theme.dim)
                     }
                 }
 

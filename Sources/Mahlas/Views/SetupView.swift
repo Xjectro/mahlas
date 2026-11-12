@@ -9,6 +9,7 @@ struct SetupView: View {
     @State private var manualKey = ""
     @State private var manualAddress = ""
     @State private var pickIPSW = false
+    @State private var confirmSeal = false
 
     var body: some View {
         PageScroll {
@@ -145,27 +146,43 @@ struct SetupView: View {
         StepCard(number: 3, title: "İlk açılış ve mühürleme", done: session.goldenReady,
                  subtitle: session.goldenReady
                     ? "Altın imaj mühürlü. Her oturum bu imajın anlık bir klonundan açılır ve kapanınca silinir."
-                    : "Sanal Mac bir kez açılır: hesabını oluşturur, Mahlas ajanını kurarsın. Sonra imaj mühürlenir.") {
+                    : "Sanal Mac'i bir kez açıp hesabını oluştur. Bitince mühürle; sonraki her oturum bu hâlin temiz bir kopyasıyla açılır.") {
             VStack(alignment: .leading, spacing: 12) {
                 if session.phase == .firstSetup {
                     VStack(alignment: .leading, spacing: 8) {
                         instruction(1, "Kurulum Yardımcısı'nı tamamla. Apple hesabıyla giriş yapma; konum servislerini ve analizleri kapat.")
-                        instruction(2, "Finder → kenar çubuğunda \"My Shared Files\" (Paylaşılan Dosyalarım) klasörünü aç.")
-                        instruction(3, "\"\(GuestAgent.installerName)\" dosyasına çift tıkla ve parolanı gir.")
-                        instruction(4, "Sanal Mac kendiliğinden kapanır, Mahlas imajı mühürler.")
+                        instruction(2, "Önerilen: Finder → \"My Shared Files\" klasöründeki \"\(GuestAgent.installerName)\" dosyasına çift tıkla. Bilgisayar adı ve saat dilimi her oturumda değişsin diye Mahlas ajanını kurar, sonra Mac'i kapatıp kendiliğinden mühürler.")
+                        instruction(3, "Ya da doğrudan aşağıdaki \"Kurulumu bitirdim, mühürle\" düğmesine bas.")
                     }
-                    Button { section = .desktop } label: { Label("Sanal Mac'e git", systemImage: "display") }
-                        .buttonStyle(RedButtonStyle())
+                    HStack {
+                        Button { section = .desktop } label: { Label("Sanal Mac'e git", systemImage: "display") }
+                            .buttonStyle(RedButtonStyle(prominent: false))
+                        Button { confirmSeal = true } label: { Label("Kurulumu bitirdim, mühürle", systemImage: "checkmark.seal.fill") }
+                            .buttonStyle(RedButtonStyle())
+                    }
                 } else if !session.goldenReady {
-                    Button { Task { await session.beginFirstSetup(); section = .desktop } } label: {
-                        Label("İlk açılışı başlat", systemImage: "power")
+                    HStack {
+                        Button { Task { await session.beginFirstSetup(); section = .desktop } } label: {
+                            Label("Sanal Mac'i aç", systemImage: "power")
+                        }
+                        .buttonStyle(RedButtonStyle(prominent: !session.installed))
+                        .disabled(!session.installed || !session.vpnConfigured || session.phase.isBusy)
+                        Button { confirmSeal = true } label: { Label("Kurulumu bitirdim, mühürle", systemImage: "checkmark.seal.fill") }
+                            .buttonStyle(RedButtonStyle())
+                            .disabled(!session.installed || session.phase.isBusy)
                     }
-                    .buttonStyle(RedButtonStyle())
-                    .disabled(!session.installed || !session.vpnConfigured || session.phase.isBusy)
-                    Text("Ağ trafiği ilk açılışta da Mullvad ağ geçidinden geçer.")
+                    Text("Sanal Mac'e daha önce girdiysen tekrar açmana gerek yok, doğrudan mühürleyebilirsin.")
                         .font(Theme.body(11.5)).foregroundStyle(Theme.faint)
+                } else if !session.agentInstalled {
+                    Note(icon: "exclamationmark.triangle.fill", color: Theme.warn,
+                         text: "Mahlas ajanı kurulmadan mühürlendi: makine kimliği, MAC, donanım ve VPN her oturumda değişir, ama bilgisayar adı ve saat dilimi imajdaki gibi kalır.")
                 }
             }
+        }
+        .confirmationDialog("Altın imaj mühürlensin mi?", isPresented: $confirmSeal) {
+            Button("Mühürle") { Task { await session.sealGolden() } }
+        } message: {
+            Text("Sanal Mac'in şu anki hâli bundan sonraki her oturumun başlangıç noktası olur. İçinde giriş yapılmış hesap, tarayıcı geçmişi ya da kişisel dosya varsa her oturumda tekrar gelir ve oturumları birbirine bağlar.\(session.phase == .firstSetup ? " Açık olan sanal Mac kapatılacak." : "")")
         }
     }
 
